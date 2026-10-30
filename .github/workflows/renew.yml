@@ -10,7 +10,7 @@ permissions:
   actions: write
 
 jobs:
-  renew-hiden:
+    renew-hiden:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
 
@@ -20,7 +20,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           persist-credentials: true
-
 
       - name: ⚙ 设置 Python
         uses: actions/setup-python@v6
@@ -50,7 +49,7 @@ jobs:
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
         run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python -u app.py
 
-      # 更新时间到time.txt,避免6个月未更新导致工作流暂停
+      # 更新时间到time.txt,避免6个月未更新导致工作流暂停（已加入 pull 变基逻辑解决冲突）
       - name: 🕒 更新时间
         run: |
           git config user.name "github-actions[bot]"
@@ -61,6 +60,7 @@ jobs:
             echo "No need to commit"
           else
             git commit -m "⏱️ Auto Update by Github Actions $(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S')"
+            git pull --rebase origin main  # 💡 核心修复：推送前先拉取变基，避免远程冲突被拒
             git push origin main
           fi
       
